@@ -1,0 +1,28 @@
+import numpy as np
+import pandas as pd
+
+from sklearn.externals import joblib
+tree=joblib.load(r'.\tmp\tree.pkl')
+
+datafile='./chapter6/demo/data/model.xls'#构造后特征的数据集
+data=pd.read_excel(datafile)
+data=data.as_matrix()
+np.random.shuffle(data)#打乱数据
+p=0.8
+train=data[:int(len(data)*p),:]#80%训练集
+test=data[int(len(data)*p):,:]#20%测试集
+
+#下面绘制决策树的ROC
+from sklearn.metrics import roc_curve
+from matplotlib import pyplot as plt
+
+fpr,tpr,thresholds=roc_curve(test[:,3],tree.predict_proba(test[:,:3])[:,1],pos_label=1)
+#roc_curve(样本类标签,预测样本概率(作为阈值)，pos_label表示第二个参数是预测为正例的概率)
+#roc_curve函数返回FPR,TPR,thresholds(阈值)，其中thresholds的第一个值不是阈值
+plt.plot(fpr,tpr,linewidth=2,label='ROC of CARF')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.xlim(0,1.05)
+plt.ylim(0,1.05)
+plt.legend(loc=4)
+plt.show()
